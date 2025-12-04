@@ -170,8 +170,10 @@ function App() {
     e.preventDefault();
 
     // Robust hit testing for touch/drag drop
-    let targetX = x;
-    let targetY = y;
+    // Default to the last known drag position (currentCoord), 
+    // fallback to event coordinates (which might be start coord due to capture) only if needed.
+    let targetX = dragState.currentCoord?.x ?? x;
+    let targetY = dragState.currentCoord?.y ?? y;
 
     const target = document.elementFromPoint(e.clientX, e.clientY);
     const cell = target?.closest('[data-grid-x]');
@@ -648,7 +650,7 @@ function App() {
                 <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-300">
                   <div className="bg-black/80 p-6 rounded-2xl border border-white/20 text-center transform scale-110 shadow-2xl">
                     <div className={`text-4xl font-black mb-2 ${logs[0]?.result === 'KILL' ? 'text-red-500 animate-bounce' :
-                        logs[0]?.result === 'HIT' ? 'text-orange-400 animate-pulse' : 'text-slate-400'
+                      logs[0]?.result === 'HIT' ? 'text-orange-400 animate-pulse' : 'text-slate-400'
                       }`}>
                       {logs[0]?.result === 'KILL' ? '击毁! 💥' : logs[0]?.result === 'HIT' ? '击中! 🔥' : '落空 💧'}
                     </div>
