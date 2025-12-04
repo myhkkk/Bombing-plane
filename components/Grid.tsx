@@ -17,6 +17,7 @@ interface GridProps {
   onPointerMove?: (x: number, y: number, e: React.PointerEvent) => void;
   onPointerUp?: (x: number, y: number, e: React.PointerEvent) => void;
   onPointerLeave?: () => void;
+  onPointerCancel?: (e: React.PointerEvent) => void;
 
   revealPlanes?: boolean;
   previewCoords?: { x: number; y: number; isValid: boolean }[];
@@ -39,6 +40,7 @@ const Grid: React.FC<GridProps> = ({
   disabled = false,
   selectedPlaneId = null,
   className = "",
+  onPointerCancel,
 }) => {
 
   // Helper to check if a cell is part of an interactive plane
@@ -158,6 +160,7 @@ const Grid: React.FC<GridProps> = ({
             gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
           }}
           onPointerLeave={onPointerLeave}
+          onPointerCancel={onPointerCancel}
         >
           {grid.map((row) =>
             row.map((cell) => {

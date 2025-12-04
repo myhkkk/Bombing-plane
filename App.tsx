@@ -230,7 +230,21 @@ function App() {
   };
 
   const handlePointerLeave = () => {
+    // Critical fix: Do NOT cancel drag if we are in the middle of a drag operation.
+    // The pointer capture on the cell will ensure we still get events.
+    if (dragState.isDragging) return;
     setDragState(prev => ({ ...prev, isDragging: false, planeId: null }));
+  };
+
+  const handlePointerCancel = (e: React.PointerEvent) => {
+    // Handle system interruptions (e.g. incoming call, browser gesture)
+    setDragState(prev => ({
+      ...prev,
+      isDragging: false,
+      planeId: null,
+      startCoord: null,
+      currentCoord: null
+    }));
   };
 
   // --- Actions ---
@@ -568,6 +582,7 @@ function App() {
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerLeave={handlePointerLeave}
+                onPointerCancel={handlePointerCancel}
                 previewCoords={previewCoords}
                 hiddenPlaneId={dragState.planeId}
               />
