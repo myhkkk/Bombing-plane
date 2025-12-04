@@ -147,22 +147,23 @@ function App() {
     e.preventDefault();
 
     // Robust hit testing for touch/drag
-    let targetX = x;
-    let targetY = y;
+    // Only update if we found a valid cell under the pointer.
+    // If we are out of bounds (e.g. dragging too fast or off-grid), 
+    // we keep the last known valid position (dragState.currentCoord) 
+    // instead of reverting to 'x/y' (which are the drag-start coordinates due to pointer capture).
 
     const target = document.elementFromPoint(e.clientX, e.clientY);
     const cell = target?.closest('[data-grid-x]');
+
     if (cell) {
       const cx = parseInt(cell.getAttribute('data-grid-x') || '-1');
       const cy = parseInt(cell.getAttribute('data-grid-y') || '-1');
-      if (cx >= 0 && cy >= 0) {
-        targetX = cx;
-        targetY = cy;
-      }
-    }
 
-    if (dragState.currentCoord?.x !== targetX || dragState.currentCoord?.y !== targetY) {
-      setDragState(prev => ({ ...prev, currentCoord: { x: targetX, y: targetY } }));
+      if (cx >= 0 && cy >= 0) {
+        if (dragState.currentCoord?.x !== cx || dragState.currentCoord?.y !== cy) {
+          setDragState(prev => ({ ...prev, currentCoord: { x: cx, y: cy } }));
+        }
+      }
     }
   };
 
@@ -170,8 +171,11 @@ function App() {
     e.preventDefault();
 
     // Robust hit testing for touch/drag drop
-    // Default to the last known drag position (currentCoord), 
-    // fallback to event coordinates (which might be start coord due to capture) only if needed.
+    // Priority: 
+    // 1. Cell currently under finger (if valid)
+    // 2. Last known valid drag position (currentCoord)
+    // 3. Start position (x, y) - fallback only
+
     let targetX = dragState.currentCoord?.x ?? x;
     let targetY = dragState.currentCoord?.y ?? y;
 
