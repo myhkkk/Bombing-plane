@@ -12,7 +12,7 @@ interface InteractivePlaneData {
 interface GridProps {
   grid: CellData[][];
   interactivePlanes?: InteractivePlaneData[]; // For Setup & Deduction
-  
+
   onPointerDown?: (x: number, y: number, e: React.PointerEvent) => void;
   onPointerMove?: (x: number, y: number, e: React.PointerEvent) => void;
   onPointerUp?: (x: number, y: number, e: React.PointerEvent) => void;
@@ -40,32 +40,32 @@ const Grid: React.FC<GridProps> = ({
   selectedPlaneId = null,
   className = "",
 }) => {
-  
+
   // Helper to check if a cell is part of an interactive plane
   const getInteractivePart = (x: number, y: number) => {
     if (!interactivePlanes) return null;
     for (const { plane, isValid, isDragging } of interactivePlanes) {
-      if (isDragging) continue; 
+      if (isDragging) continue;
       const cell = plane.cells.find(c => c.x === x && c.y === y);
       if (cell) {
-         return { 
-           part: cell.part || (cell as any).part, 
-           isValid, 
-           id: plane.id,
-           isSelected: plane.id === selectedPlaneId
-         };
+        return {
+          part: cell.part || (cell as any).part,
+          isValid,
+          id: plane.id,
+          isSelected: plane.id === selectedPlaneId
+        };
       }
     }
     return null;
   };
 
   const getCellContent = (
-    cell: CellData, 
-    isPreview: boolean, 
+    cell: CellData,
+    isPreview: boolean,
     isValidPreview: boolean,
     interactivePart: { part: PlanePart, isValid: boolean, isSelected: boolean } | null
   ) => {
-    
+
     // 1. Hit/Miss markers (Top priority)
     if (cell.status === CellStatus.DEAD) {
       return <Skull className="w-[80%] h-[80%] text-red-950 fill-red-500 drop-shadow-md animate-pulse z-20 pointer-events-none" />;
@@ -82,22 +82,22 @@ const Grid: React.FC<GridProps> = ({
       let color = interactivePart.isValid ? "bg-slate-500" : "bg-red-500/50";
       let cursorClass = "";
       let borderClass = interactivePart.isValid ? 'border-slate-700/20' : 'border-red-500/50';
-      
+
       if (interactivePart.isSelected) {
-         color = interactivePart.isValid ? "bg-yellow-500/40" : "bg-red-500/60";
-         borderClass = "border-yellow-400 border-2";
+        color = interactivePart.isValid ? "bg-yellow-500/40" : "bg-red-500/60";
+        borderClass = "border-yellow-400 border-2";
       }
 
       if (interactivePart.part === PlanePart.HEAD) {
         color = interactivePart.isValid ? "bg-emerald-500 ring-2 ring-emerald-500/50 z-10" : "bg-red-600 ring-2 ring-red-600/50 z-10";
         if (interactivePart.isSelected) {
-            color = "bg-yellow-500 ring-2 ring-yellow-400 z-10";
+          color = "bg-yellow-500 ring-2 ring-yellow-400 z-10";
         }
         cursorClass = "cursor-grab active:cursor-grabbing";
       } else if (interactivePart.part === PlanePart.BODY) {
         if (!interactivePart.isSelected) color = interactivePart.isValid ? "bg-slate-600" : "bg-red-500/60";
       }
-      
+
       return <div className={`w-full h-full ${color} border ${borderClass} absolute inset-0 transition-colors ${cursorClass}`} />;
     }
 
@@ -112,14 +112,14 @@ const Grid: React.FC<GridProps> = ({
     if (!interactivePlanes && cell.status === CellStatus.PLANE && revealPlanes && cell.planeId !== hiddenPlaneId) {
       let color = "bg-slate-500";
       let cursorClass = "";
-      
+
       if (cell.part === PlanePart.HEAD) {
         color = "bg-emerald-500 ring-2 ring-emerald-500/50 z-10";
         cursorClass = "cursor-grab active:cursor-grabbing";
       } else if (cell.part === PlanePart.BODY) {
         color = "bg-slate-600";
       }
-      
+
       return <div className={`w-full h-full ${color} border border-slate-700/20 absolute inset-0 transition-colors ${cursorClass}`} />;
     }
 
@@ -127,10 +127,10 @@ const Grid: React.FC<GridProps> = ({
   };
 
   const getCellBackground = (cell: CellData) => {
-    if (cell.status === CellStatus.DEAD) return 'bg-red-900/40'; 
+    if (cell.status === CellStatus.DEAD) return 'bg-red-900/40';
     if (cell.status === CellStatus.HIT) return 'bg-orange-900/40';
-    if (cell.status === CellStatus.MISS) return 'bg-slate-800/80'; 
-    return 'bg-slate-900/80'; 
+    if (cell.status === CellStatus.MISS) return 'bg-slate-800/80';
+    return 'bg-slate-900/80';
   };
 
   return (
@@ -152,9 +152,9 @@ const Grid: React.FC<GridProps> = ({
           ))}
         </div>
 
-        <div 
+        <div
           className="grid gap-px bg-slate-700/50 border border-slate-700/50 rounded-sm shadow-xl touch-none aspect-square w-full"
-          style={{ 
+          style={{
             gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
           }}
           onPointerLeave={onPointerLeave}
@@ -165,7 +165,7 @@ const Grid: React.FC<GridProps> = ({
               const isPreview = !!preview;
               const isValid = preview?.isValid ?? false;
               const interactivePart = getInteractivePart(cell.x, cell.y);
-              
+
               return (
                 <div
                   key={`${cell.x}-${cell.y}`}
@@ -178,6 +178,8 @@ const Grid: React.FC<GridProps> = ({
                   onPointerDown={(e) => !disabled && onPointerDown && onPointerDown(cell.x, cell.y, e)}
                   onPointerMove={(e) => !disabled && onPointerMove && onPointerMove(cell.x, cell.y, e)}
                   onPointerUp={(e) => !disabled && onPointerUp && onPointerUp(cell.x, cell.y, e)}
+                  data-grid-x={cell.x}
+                  data-grid-y={cell.y}
                 >
                   {getCellContent(cell, isPreview, isValid, interactivePart)}
                 </div>
